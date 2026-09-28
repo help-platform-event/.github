@@ -10,7 +10,7 @@ Staging: https://staging-mt-event-app.duckdns.org/ - V1 prototype, frozen: it wo
 |---|---|---|---|
 | [`event-app`](https://github.com/help-platform-event/event-app) | Frontend + Gateway (public API, events, missions, slots, participation) | React/TypeScript, NestJS, Prisma, MySQL, kafkajs | Local dev (V1 on staging) |
 | [`ms-auth-java`](https://github.com/help-platform-event/ms-auth-java) | Auth, users and settings (JWT, refresh tokens, Google OAuth). Has replaced the original NestJS auth service | Spring Boot, JPA/Hibernate, Flyway, MySQL, Kafka | Local dev |
-| `ms-notification-java` | Notifications: consumes Kafka events, sends emails (in-app next) | Spring Boot, Spring Kafka, JPA, MySQL, Spring Mail | In progress - private for now |
+| [`ms-notification-java`](https://github.com/help-platform-event/ms-notification-java) | Notifications: consumes Kafka events, sends emails (in-app next) | Spring Boot, Spring Kafka, JPA, MySQL, Spring Mail | Local dev |
 
 Each repo's README describes its own service: what it does, and how to run and test it on its own. This page covers the whole platform.
 
