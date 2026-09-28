@@ -44,6 +44,7 @@ Front ──HTTP──► Gateway (NestJS) ──HTTP──► ms-auth-java
 | `auth.password.changed` | ms-auth-java | A user changes their password | ms-notification-java: security email |
 | `event.participation.requested` | Gateway | A volunteer asks to join a slot | ms-notification-java: email to the organizer |
 | `event.participation.decided` | Gateway | The organizer accepts or rejects | ms-notification-java: email to the volunteer |
+| `event.participation.cancelled` | Gateway | The volunteer or the organizer cancels a participation | ms-notification-java: email to the other party |
 
 Two rules: **whoever publishes a topic declares it** (3 partitions, messages keyed by user id), and **only what a consumer uses is published**.
 
