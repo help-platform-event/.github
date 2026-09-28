@@ -10,7 +10,7 @@ Staging: https://staging-mt-event-app.duckdns.org/ - V1 prototype, frozen: it wo
 |---|---|---|---|
 | [`event-app`](https://github.com/help-platform-event/event-app) | Frontend + Gateway (public API, events, missions, slots, participation) | React/TypeScript, NestJS, Prisma, MySQL, kafkajs | Local dev (V1 on staging) |
 | [`ms-auth-java`](https://github.com/help-platform-event/ms-auth-java) | Auth, users and settings (JWT, refresh tokens, Google OAuth). Has replaced the original NestJS auth service | Spring Boot, JPA/Hibernate, Flyway, MySQL, Kafka | Local dev |
-| [`ms-notification-java`](https://github.com/help-platform-event/ms-notification-java) | Notifications: consumes Kafka events, sends emails (in-app next) | Spring Boot, Spring Kafka, JPA, MySQL, Spring Mail | Local dev |
+| [`ms-notification-java`](https://github.com/help-platform-event/ms-notification-java) | Notifications: consumes Kafka events, sends emails and in-app notifications (the bell) | Spring Boot, Spring Kafka, JPA, MySQL, Spring Mail | Local dev |
 
 Each repo's README describes its own service: what it does, and how to run and test it on its own. This page covers the whole platform.
 
@@ -28,7 +28,7 @@ Front ──HTTP──► Gateway (NestJS) ──HTTP──► ms-auth-java
                    ─────────────── Kafka ───────────────
                                      │
                                      ▼
-                           ms-notification-java ──► email (in-app next)
+                           ms-notification-java ──► email + in-app (polled by the Front's bell via the Gateway)
 ```
 
 - **Synchronous calls go over HTTP.** The Gateway calls `ms-auth-java` and verifies its JWTs locally. This replaced the original NATS request/reply setup, which is gone, along with the NestJS auth service and its MongoDB.
@@ -98,5 +98,5 @@ To see Kafka at work (consumer lag, catch-up, preferences, retries and dead-lett
 
 ## Status
 
-- Done: auth moved to Java, NATS removed, notification emails (account, security, participation), filtered by user preferences.
-- Next: in-app notifications (a bell in the Front), then a real-time discussion chat on each event's page (WebSocket, Java), then GraalVM native images, then deployment to GCP.
+- Done: auth moved to Java, NATS removed, notifications (account and security emails; participation emails and in-app notifications in a bell, filtered by user preferences).
+- Next: a real-time discussion chat on each event's page (WebSocket, Java), then GraalVM native images, then deployment to GCP.
