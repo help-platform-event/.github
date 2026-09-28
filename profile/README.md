@@ -99,4 +99,4 @@ To see Kafka at work (consumer lag, catch-up, preferences, retries and dead-lett
 ## Status
 
 - Done: auth moved to Java, NATS removed, notification emails (account, security, participation), filtered by user preferences.
-- Next: in-app notifications (a bell in the Front), then GraalVM native images, then deployment to GCP.
+- Next: in-app notifications (a bell in the Front), then a real-time discussion chat on each event's page (WebSocket, Java), then GraalVM native images, then deployment to GCP.
