@@ -49,7 +49,7 @@ Two rules: **whoever publishes a topic declares it** (3 partitions, messages key
 
 ## Run the whole platform
 
-**Requirements:** Docker with Docker Compose, Node.js + pnpm, and the three repos cloned side by side (`ms-notification-java` is private for now):
+**Requirements:** Docker with Docker Compose, Node.js + pnpm, and the three repos cloned side by side:
 
 ```
 some-folder/
