@@ -99,5 +99,5 @@ To see Kafka at work (consumer lag, catch-up, preferences, retries and dead-lett
 
 ## Status
 
-- Done: auth moved to Java, NATS removed, notifications (account and security emails; participation emails and in-app notifications in a bell, filtered by user preferences).
+- Done: auth moved to Java, NATS removed, notifications (account and security emails; participation emails and in-app notifications in a bell, filtered by user preferences), a "Mes missions" page where volunteers follow and cancel their registrations (organizers can remove a volunteer too).
 - Next: a real-time discussion chat on each event's page (WebSocket, Java), then GraalVM native images, then deployment to GCP.
