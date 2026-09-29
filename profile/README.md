@@ -11,6 +11,7 @@ Staging: https://staging-mt-event-app.duckdns.org/ - V1 prototype, frozen: it wo
 | [`event-app`](https://github.com/help-platform-event/event-app) | Frontend + Gateway (public API, events, missions, slots, participation) | React/TypeScript, NestJS, Prisma, MySQL, kafkajs | Local dev (V1 on staging) |
 | [`ms-auth-java`](https://github.com/help-platform-event/ms-auth-java) | Auth, users and settings (JWT, refresh tokens, Google OAuth). Has replaced the original NestJS auth service | Spring Boot, JPA/Hibernate, Flyway, MySQL, Kafka | Local dev |
 | [`ms-notification-java`](https://github.com/help-platform-event/ms-notification-java) | Notifications: consumes Kafka events, sends emails and in-app notifications (the bell) | Spring Boot, Spring Kafka, JPA, MySQL, Spring Mail | Local dev |
+| [`ms-chat-java`](https://github.com/help-platform-event/ms-chat-java) | Real-time discussion on each event, for its organizer and accepted volunteers | Spring Boot, WebSocket + STOMP, JPA, MySQL | Local dev |
 
 Each repo's README describes its own service: what it does, and how to run and test it on its own. This page covers the whole platform.
 
@@ -21,6 +22,7 @@ Started as a single monorepo (pnpm + Turborepo). The Java services live in their
 ## Architecture
 
 ```
+Front ──WebSocket (/chat)──► Gateway ──► ms-chat-java ──HTTP (is this user a member?)──► Gateway
 Front ──HTTP──► Gateway (NestJS) ──HTTP──► ms-auth-java
                      │                          │
                      │ event.participation.*    │ auth.*
@@ -32,6 +34,7 @@ Front ──HTTP──► Gateway (NestJS) ──HTTP──► ms-auth-java
 ```
 
 - **Synchronous calls go over HTTP.** The Gateway calls `ms-auth-java` and verifies its JWTs locally. This replaced the original NATS request/reply setup, which is gone, along with the NestJS auth service and its MongoDB.
+- **Real time:** the bell is pushed over Server-Sent Events (server → client only); the event discussion uses WebSocket + STOMP (both ways). Both go through the Gateway, and both connections close when the user's access token expires, then reconnect with a fresh one.
 - **Events go over Kafka, fire-and-forget.** A service publishes what happened after its database transaction commits. Consumers react without calling the publisher back.
 - **`ms-notification-java`** keeps its own copy of each user's email and notification preferences, built from those events. It only notifies a user if their preferences allow it. This is where the Kafka concepts NATS doesn't offer come in: consumer groups, offset replay to rebuild state, a compacted topic, retries with a dead-letter topic, and idempotent consumers.
 
@@ -50,16 +53,17 @@ Two rules: **whoever publishes a topic declares it** (3 partitions, messages key
 
 ## Run the whole platform
 
-**Requirements:** Docker with Docker Compose, Node.js + pnpm, and the three repos cloned side by side:
+**Requirements:** Docker with Docker Compose, Node.js + pnpm, and the four repos cloned side by side:
 
 ```
 some-folder/
 ├── event-app/
 ├── ms-auth-java/
-└── ms-notification-java/
+├── ms-notification-java/
+└── ms-chat-java/
 ```
 
-`event-app`'s `docker-compose.dev.yml` includes the two Java repos' `compose.yaml`, so one command starts everything.
+`event-app`'s `docker-compose.dev.yml` includes the Java repos' `compose.yaml`, so one command starts everything.
 
 1. Create a `.env` at the root of `event-app` (template: `apps/gateway/.env.example`). The compose file already sets the database, service URLs, Kafka and JWT settings. Add:
    - `VITE_GOOGLE_CLIENT_ID` and `VITE_GEOAPIFY_API_KEY` (passed to the Front at build time);
@@ -80,6 +84,7 @@ pnpm stack:reset   # stop and wipe volumes (fresh databases)
 | Gateway API (Swagger at `/api`) | http://localhost:3000 |
 | ms-auth-java | http://localhost:8080 |
 | ms-notification-java | http://localhost:8085/actuator/health |
+| ms-chat-java (WebSocket via the Gateway: `ws://localhost:3000/chat`) | http://localhost:8086/actuator/health |
 | Mailpit (every email sent) | http://localhost:8025 |
 | Kafka UI (topics, messages, consumer groups) | http://localhost:8082 |
 | phpMyAdmin (Gateway DB) | http://localhost:8083 |
@@ -93,11 +98,12 @@ To see Kafka at work (consumer lag, catch-up, preferences, retries and dead-lett
 - **Backend (TypeScript):** NestJS, Prisma, MySQL
 - **Backend (Java):** Java 21, Spring Boot 4, JPA/Hibernate, Flyway, MySQL, Spring Security
 - **Messaging:** Kafka (Spring Kafka, kafkajs)
+- **Real time:** Server-Sent Events, WebSocket + STOMP (Spring, @stomp/stompjs)
 - **Frontend:** React, TypeScript, TanStack Query, shadcn/ui
 - **Testing:** Jest, JUnit 5, Testcontainers (real MySQL + Kafka)
 - **Infra:** Docker / Docker Compose (the whole stack in one command), GitHub Actions, GHCR. V1 on AWS EC2; next: GCP (Terraform), with GraalVM native images for the Java services.
 
 ## Status
 
-- Done: auth moved to Java, NATS removed, notifications (account and security emails; participation emails and in-app notifications in a bell, filtered by user preferences), a "Mes missions" page where volunteers follow and cancel their registrations (organizers can remove a volunteer too).
-- Next: a real-time discussion chat on each event's page (WebSocket, Java), then GraalVM native images, then deployment to GCP.
+- Done: auth moved to Java, NATS removed, notifications (account and security emails; participation emails and in-app notifications in a bell, filtered by user preferences), a "Mes missions" page where volunteers follow and cancel their registrations (organizers can remove a volunteer too), the bell pushed live over SSE, and a real-time discussion on each event's page (WebSocket + STOMP, Java).
+- Next: GraalVM native images, then deployment to GCP.
