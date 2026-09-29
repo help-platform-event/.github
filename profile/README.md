@@ -91,8 +91,6 @@ pnpm stack:reset   # stop and wipe volumes (fresh databases)
 | Adminer (auth DB, server `mysql`) | http://localhost:8081 |
 | Kafka | `localhost:9094` from the host, `kafka:29092` from containers |
 
-To see Kafka at work (consumer lag, catch-up, preferences, retries and dead-letter topic, replay), follow the walkthrough in `ms-notification-java`'s README.
-
 ## Stack overview
 
 - **Backend (TypeScript):** NestJS, Prisma, MySQL
@@ -101,9 +99,4 @@ To see Kafka at work (consumer lag, catch-up, preferences, retries and dead-lett
 - **Real time:** Server-Sent Events, WebSocket + STOMP (Spring, @stomp/stompjs)
 - **Frontend:** React, TypeScript, TanStack Query, shadcn/ui
 - **Testing:** Jest, JUnit 5, Testcontainers (real MySQL + Kafka)
-- **Infra:** Docker / Docker Compose (the whole stack in one command), GitHub Actions, GHCR. V1 on AWS EC2; next: GCP (Terraform), with GraalVM native images for the Java services.
-
-## Status
-
-- Done: auth moved to Java, NATS removed, notifications (account and security emails; participation emails and in-app notifications in a bell, filtered by user preferences), a "Mes missions" page where volunteers follow and cancel their registrations (organizers can remove a volunteer too), the bell pushed live over SSE, and a real-time discussion on each event's page (WebSocket + STOMP, Java).
-- Next: GraalVM native images, then deployment to GCP.
+- **Infra:** Docker, GitHub Actions, GHCR. V1 on AWS EC2.
