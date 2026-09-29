@@ -28,7 +28,7 @@ Front ──HTTP──► Gateway (NestJS) ──HTTP──► ms-auth-java
                    ─────────────── Kafka ───────────────
                                      │
                                      ▼
-                           ms-notification-java ──► email + in-app (polled by the Front's bell via the Gateway)
+                           ms-notification-java ──► email + in-app (pushed to the Front's bell over SSE, via the Gateway)
 ```
 
 - **Synchronous calls go over HTTP.** The Gateway calls `ms-auth-java` and verifies its JWTs locally. This replaced the original NATS request/reply setup, which is gone, along with the NestJS auth service and its MongoDB.
